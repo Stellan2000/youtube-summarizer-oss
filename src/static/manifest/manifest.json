@@ -1,9 +1,12 @@
 {
   "manifest_version": 3,
   "name": "YouTube Summary",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Generate AI summaries of YouTube videos",
-  "permissions": ["storage", "activeTab"],
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
   "action": {
     "default_popup": "popup/index.html",
     "default_icon": {
@@ -19,12 +22,19 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.youtube.com/*"],
-      "js": ["content/index.js"],
-      "css": ["content/styles.css"]
+      "matches": [
+        "*://*.youtube.com/*"
+      ],
+      "js": [
+        "content/index.js"
+      ],
+      "css": [
+        "content/styles.css"
+      ]
     }
   ],
   "background": {
     "service_worker": "background/index.js"
-  }
+  },
+  "version_name": "1.1.0"
 }
