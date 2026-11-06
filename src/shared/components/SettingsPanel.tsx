@@ -3,6 +3,11 @@ import type { AIProvider } from "../config";
 import { providers } from "../config";
 import { ModelSelect } from "./ModelSelect";
 import { fetchModels } from "../../content/utils/ai";
+import {
+  DEFAULT_SUMMARY_PROMPT,
+  getSummaryPrompt,
+  normalizeSummaryPrompt,
+} from "../summaryPrompt";
 
 interface AIModel {
   id: string;
@@ -35,6 +40,49 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const [customBaseUrl, setCustomBaseUrl] = useState<string>("");
   const [customModel, setCustomModel] = useState<string>("");
+  const [summaryPrompt, setSummaryPrompt] = useState(DEFAULT_SUMMARY_PROMPT);
+  const [savedPrompt, setSavedPrompt] = useState(DEFAULT_SUMMARY_PROMPT);
+  const [promptLoaded, setPromptLoaded] = useState(false);
+  const [promptSaving, setPromptSaving] = useState(false);
+  const [promptStatus, setPromptStatus] = useState("");
+  const [promptError, setPromptError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    getSummaryPrompt()
+      .then((prompt) => {
+        if (!active) return;
+        setSummaryPrompt(prompt);
+        setSavedPrompt(prompt);
+        setPromptLoaded(true);
+      })
+      .catch(() => {
+        if (!active) return;
+        setPromptError("Could not load your saved prompt. Close settings and try again.");
+      });
+    return () => { active = false; };
+  }, []);
+
+  const savePrompt = async (reset = false) => {
+    setPromptSaving(true);
+    setPromptStatus("");
+    setPromptError("");
+    const prompt = reset ? DEFAULT_SUMMARY_PROMPT : normalizeSummaryPrompt(summaryPrompt);
+    try {
+      if (reset) {
+        await chrome.storage.local.remove("summaryPrompt");
+      } else {
+        await chrome.storage.local.set({ summaryPrompt: prompt });
+      }
+      setSummaryPrompt(prompt);
+      setSavedPrompt(prompt);
+      setPromptStatus(reset ? "Default prompt restored." : "Prompt saved.");
+    } catch {
+      setPromptError("Could not save the prompt. Please try again.");
+    } finally {
+      setPromptSaving(false);
+    }
+  };
 
   const handleFetchModels = useCallback(
     async (provider: AIProvider, key: string) => {
@@ -163,7 +211,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
     <div className={`yt-summary-container ${className}`}>
       {showHeader && (
         <div className="settings-header">
-          <h3>AI Provider Settings</h3>
+          <h3>Summary Settings</h3>
           {onClose && (
             <button onClick={onClose} className="close-button">
               ×
@@ -172,6 +220,46 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
         </div>
       )}
       <div className="settings-content">
+        <div className="settings-section">
+          <label htmlFor="summaryPrompt">Summary prompt</label>
+          <textarea
+            id="summaryPrompt"
+            className="summary-prompt-input"
+            rows={9}
+            value={summaryPrompt}
+            disabled={!promptLoaded || promptSaving}
+            aria-describedby="summary-prompt-help"
+            onChange={(event) => {
+              setSummaryPrompt(event.target.value);
+              setPromptStatus("");
+              setPromptError("");
+            }}
+          />
+          <p id="summary-prompt-help" className="summary-prompt-help">
+            Choose the language, length and format. The video transcript is added
+            automatically. Save to apply this to your next summary.
+          </p>
+          <div className="summary-prompt-actions">
+            <button
+              type="button"
+              className="summary-prompt-save"
+              disabled={!promptLoaded || promptSaving || summaryPrompt === savedPrompt}
+              onClick={() => savePrompt()}
+            >
+              {promptSaving ? "Saving…" : "Save prompt"}
+            </button>
+            <button
+              type="button"
+              className="summary-prompt-reset"
+              disabled={!promptLoaded || promptSaving}
+              onClick={() => savePrompt(true)}
+            >
+              Reset to default
+            </button>
+          </div>
+          {promptStatus && <p className="summary-prompt-status" role="status">{promptStatus}</p>}
+          {promptError && <p className="error-message" role="alert">{promptError}</p>}
+        </div>
         <div className="settings-section">
           <label htmlFor="apiKey">API Key</label>
           <input
