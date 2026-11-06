@@ -704,6 +704,67 @@
   font-style: italic;
 }
 
+.summary-prompt-input {
+  display: block;
+  width: 100%;
+  min-height: 200px;
+  box-sizing: border-box;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid #4b5563;
+  border-radius: 8px;
+  background: #2c2d30;
+  color: #f3f4f6;
+  font: 14px/1.5 Arial, sans-serif;
+}
+
+.summary-prompt-input:focus {
+  outline: 2px solid #ef4444;
+  outline-offset: 2px;
+}
+
+.summary-prompt-help,
+.summary-prompt-status {
+  margin: 10px 0;
+  color: #b6bcc7;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.summary-prompt-status {
+  color: #86efac;
+}
+
+.summary-prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.summary-prompt-actions button {
+  padding: 9px 12px;
+  border: 1px solid #4b5563;
+  border-radius: 6px;
+  font: 600 13px Arial, sans-serif;
+  cursor: pointer;
+}
+
+.summary-prompt-save {
+  background: #ef4444;
+  color: #fff;
+}
+
+.summary-prompt-reset {
+  background: #2c2d30;
+  color: #f3f4f6;
+}
+
+.summary-prompt-actions button:disabled,
+.summary-prompt-input:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .popup-container {
   width: 400px;
   min-height: 300px;
