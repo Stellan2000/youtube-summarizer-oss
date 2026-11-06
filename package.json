@@ -1,10 +1,12 @@
 {
   "name": "yt-summary-extension",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "dev": "bun run build.ts --watch",
-    "build": "bun run build.ts"
+    "build": "bun run build.ts",
+    "test": "bun test tests/summaryPrompt.test.ts",
+    "test:transcript": "node --test tests/autoTranscript.test.cjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
@@ -24,6 +26,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "linkedom": "0.18.12",
     "sharp": "^0.33.2"
   }
 }
