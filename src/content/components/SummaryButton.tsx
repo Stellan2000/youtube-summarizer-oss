@@ -94,7 +94,9 @@ export const SummaryButton: React.FC = () => {
 
       const subtitles = await extractSubtitles();
       if (!subtitles) {
-        throw new Error("Could not extract subtitles from this video");
+        throw new Error(
+          "Could not read subtitles automatically. Open YouTube's Show transcript panel (Visa transkription), then click Summarize again."
+        );
       }
 
       if (!selectedProvider) {
