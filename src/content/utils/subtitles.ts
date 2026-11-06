@@ -1,3 +1,5 @@
+import { readVisibleTranscript } from "./transcriptPanel.js";
+
 interface SubtitleTrack {
   baseUrl: string;
   name: string;
@@ -5,7 +7,31 @@ interface SubtitleTrack {
   isTranslatable: boolean;
 }
 
+declare global {
+  var __ytSummaryTranscriptCache:
+    | { videoId: string; text: string; staleText?: string; ready?: Promise<void> }
+    | undefined;
+}
+
 export async function extractSubtitles(): Promise<string | null> {
+  const currentVideoId = new URLSearchParams(window.location.search).get("v");
+  const cached = globalThis.__ytSummaryTranscriptCache;
+  if (cached?.videoId === currentVideoId) {
+    await cached.ready;
+    if (new URLSearchParams(window.location.search).get("v") !== currentVideoId) {
+      return null;
+    }
+    if (cached.text) return cached.text;
+  }
+
+  // YouTube's own transcript panel already contains decoded caption text.
+  // Prefer it over the legacy timed-text endpoint, which can return no text.
+  const visibleTranscript = readVisibleTranscript();
+
+  if (visibleTranscript && visibleTranscript !== cached?.staleText) {
+    return visibleTranscript;
+  }
+
   try {
     // Get video ID from URL
     const urlParams = new URLSearchParams(window.location.search);

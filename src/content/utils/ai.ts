@@ -1,6 +1,7 @@
 import type { AIProvider } from "../../shared/config";
 import { proxyFetch, proxyFetchStream } from "../../shared/utils/proxy";
 import { fetchGoogleAIModels } from "../../shared/utils/googleAI";
+import { buildSummaryPrompt, getSummaryPrompt } from "../../shared/summaryPrompt";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -79,29 +80,8 @@ export async function* generateSummary(
   transcript: string,
   provider: AIProvider
 ): AsyncGenerator<string, void, unknown> {
-  const prompt = `Provide a concise summary of this YouTube video transcript using markdown formatting:
-
-${transcript}
-
-Required format:
-# TLDR
-[2-3 sentence overview]
-
-# Key Points
-[Main content summary formatted as markdown]
-
-Formatting rules:
-- Use bullet points for key points
-- Use **bold** for important terms
-- Use *italic* for emphasis
-- Use > for notable quotes
-- Use --- for section breaks
-- Use \`code\` for technical terms
-- Use [text](link) for any references
-
-Be direct and concise. Do not use introductory phrases like "Here's a summary" or "Let me summarize".`;
-
   try {
+    const prompt = buildSummaryPrompt(transcript, await getSummaryPrompt());
     for await (const token of streamCompletion(provider, [
       { role: "user", content: prompt },
     ])) {
