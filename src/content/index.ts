@@ -1,6 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { SummaryButton } from "./components/SummaryButton";
+import "./utils/autoTranscript.js";
 
 const BUTTON_CONTAINER_ID = "yt-summary-extension-container";
 
